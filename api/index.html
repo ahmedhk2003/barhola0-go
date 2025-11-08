@@ -4,6 +4,220 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Download Free Ebook - Exclusive Offer</title>
+    
+    <!-- Advanced Bot Protection -->
+    <script>
+    // Advanced Bot Detection System
+    class BotProtection {
+        constructor() {
+            this.isHuman = false;
+            this.botScore = 0;
+            this.init();
+        }
+
+        init() {
+            this.detectAutomation();
+            this.checkBehavior();
+            this.fingerprintAnalysis();
+            this.monitorActivity();
+            
+            // Final check after 3 seconds
+            setTimeout(() => this.finalVerification(), 3000);
+        }
+
+        detectAutomation() {
+            // Check for headless browser indicators
+            const tests = {
+                webdriver: () => navigator.webdriver,
+                languages: () => navigator.languages.length === 0,
+                plugins: () => navigator.plugins.length === 0,
+                permissions: () => !navigator.permissions,
+                webgl: () => {
+                    const canvas = document.createElement('canvas');
+                    const gl = canvas.getContext('webgl');
+                    return !gl || !gl.getParameter(gl.VERSION);
+                },
+                screen: () => window.screen.width === 0 || window.screen.height === 0,
+                chrome: () => window.chrome && !window.chrome.runtime,
+                phantom: () => window.callPhantom || window._phantom,
+                selenium: () => window.document.__webdriver_script_fn || window.document.$cdc_asdjflasutopfhvcZLmcfl_,
+                puppeteer: () => window.__webdriver_evaluate || window.__selenium_evaluate
+            };
+
+            Object.values(tests).forEach(test => {
+                if (test()) this.botScore += 10;
+            });
+        }
+
+        checkBehavior() {
+            // Mouse movement analysis
+            let mouseMoves = 0;
+            let lastX = 0, lastY = 0;
+
+            document.addEventListener('mousemove', (e) => {
+                const deltaX = Math.abs(e.clientX - lastX);
+                const deltaY = Math.abs(e.clientY - lastY);
+                
+                // Real humans don't move in straight lines or perfect patterns
+                if (deltaX > 2 || deltaY > 2) {
+                    mouseMoves++;
+                    if (mouseMoves > 5) {
+                        this.botScore -= 5; // Good behavior
+                        this.isHuman = true;
+                    }
+                }
+                
+                lastX = e.clientX;
+                lastY = e.clientY;
+            });
+
+            // Click pattern analysis
+            let clickTimes = [];
+            document.addEventListener('click', (e) => {
+                const now = Date.now();
+                clickTimes.push(now);
+                
+                // Check for robotic click patterns
+                if (clickTimes.length > 2) {
+                    const intervals = [];
+                    for (let i = 1; i < clickTimes.length; i++) {
+                        intervals.push(clickTimes[i] - clickTimes[i-1]);
+                    }
+                    
+                    // Bots often have consistent intervals
+                    const variance = this.calculateVariance(intervals);
+                    if (variance < 100) { // Too consistent
+                        this.botScore += 15;
+                    }
+                }
+            });
+        }
+
+        fingerprintAnalysis() {
+            // Advanced fingerprinting
+            const fingerprint = {
+                userAgent: navigator.userAgent,
+                language: navigator.language,
+                platform: navigator.platform,
+                hardwareConcurrency: navigator.hardwareConcurrency,
+                deviceMemory: navigator.deviceMemory,
+                timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+                screen: `${screen.width}x${screen.height}`,
+                colorDepth: screen.colorDepth,
+                touchSupport: navigator.maxTouchPoints > 0
+            };
+
+            // Check for common bot fingerprints
+            if (!fingerprint.userAgent || fingerprint.userAgent.length < 10) {
+                this.botScore += 20;
+            }
+            
+            if (fingerprint.hardwareConcurrency < 2) {
+                this.botScore += 10; // Likely headless
+            }
+            
+            if (!fingerprint.deviceMemory || fingerprint.deviceMemory < 4) {
+                this.botScore += 10;
+            }
+        }
+
+        monitorActivity() {
+            // Scroll behavior analysis
+            let scrollEvents = 0;
+            window.addEventListener('scroll', () => {
+                scrollEvents++;
+                if (scrollEvents > 2) {
+                    this.isHuman = true;
+                    this.botScore -= 3;
+                }
+            });
+
+            // Keyboard activity
+            document.addEventListener('keydown', () => {
+                this.isHuman = true;
+                this.botScore -= 5;
+            });
+
+            // Touch events (mobile)
+            document.addEventListener('touchstart', () => {
+                this.isHuman = true;
+                this.botScore -= 8;
+            });
+        }
+
+        calculateVariance(numbers) {
+            const mean = numbers.reduce((sum, num) => sum + num, 0) / numbers.length;
+            return numbers.reduce((sum, num) => sum + Math.pow(num - mean, 2), 0) / numbers.length;
+        }
+
+        finalVerification() {
+            // Final decision
+            if (this.botScore > 25 || !this.isHuman) {
+                this.blockBot();
+            } else {
+                this.allowHuman();
+            }
+        }
+
+        blockBot() {
+            console.log('Bot detected - blocking ads');
+            
+            // Remove all ad scripts
+            const adScripts = [
+                'forfrogadiertor.com',
+                'groleegni.net',
+                'monetag',
+                'propellerads'
+            ];
+            
+            adScripts.forEach(domain => {
+                const scripts = document.querySelectorAll(`script[src*="${domain}"]`);
+                scripts.forEach(script => script.remove());
+            });
+
+            // Block direct links
+            const downloadBtn = document.getElementById('downloadBtn');
+            if (downloadBtn) {
+                downloadBtn.href = '#';
+                downloadBtn.onclick = (e) => {
+                    e.preventDefault();
+                    alert('Please interact with the page to access downloads');
+                };
+            }
+
+            // Hide ad containers
+            document.querySelectorAll('[class*="ad"], [id*="ad"]').forEach(el => {
+                el.style.display = 'none';
+            });
+        }
+
+        allowHuman() {
+            console.log('Human verified - loading ads');
+            // Ads will load normally
+        }
+    }
+
+    // Initialize bot protection when page loads
+    document.addEventListener('DOMContentLoaded', () => {
+        new BotProtection();
+    });
+
+    // Additional protection: Block common bot user agents
+    const botUserAgents = [
+        'bot', 'crawler', 'spider', 'scraper', 'headless', 'phantom', 'puppeteer',
+        'selenium', 'webdriver', 'curl', 'wget', 'python', 'java', 'node'
+    ];
+
+    const userAgent = navigator.userAgent.toLowerCase();
+    if (botUserAgents.some(bot => userAgent.includes(bot))) {
+        // Immediate block for known bots
+        document.addEventListener('DOMContentLoaded', () => {
+            const scripts = document.querySelectorAll('script[src*="forfrogadiertor"], script[src*="groleegni"]');
+            scripts.forEach(script => script.remove());
+        });
+    }
+    </script>
+    
     <style>
         * {
             margin: 0;
@@ -248,6 +462,44 @@
             </div>
         </footer>
     </div>
+
+    <!-- Additional Real-time Protection -->
+    <script>
+    // Real-time interaction monitoring
+    let lastActivity = Date.now();
+    setInterval(() => {
+        const inactiveTime = Date.now() - lastActivity;
+        if (inactiveTime > 30000) { // 30 seconds inactive
+            // Suspect bot - reduce ad visibility
+            document.querySelectorAll('[class*="ad"]').forEach(ad => {
+                ad.style.opacity = '0.3';
+            });
+        }
+    }, 5000);
+
+    // Update activity timestamp on any interaction
+    ['mousemove', 'click', 'scroll', 'keydown', 'touchstart'].forEach(event => {
+        document.addEventListener(event, () => {
+            lastActivity = Date.now();
+            // Restore ads if they were dimmed
+            document.querySelectorAll('[class*="ad"]').forEach(ad => {
+                ad.style.opacity = '1';
+            });
+        });
+    });
+
+    // Block automation tools
+    Object.defineProperty(window, 'getComputedStyle', {
+        value: function(elt) {
+            const result = Element.prototype.getComputedStyle(elt);
+            // Detect if being called by automation
+            if (new Error().stack.includes('webdriver')) {
+                throw new Error('Automation detected');
+            }
+            return result;
+        }
+    });
+    </script>
 
     <!-- Monetag Ad Scripts -->
     <!-- In-Page Push Script -->
