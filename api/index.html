@@ -79,54 +79,114 @@ footer{text-align:center;padding:20px;color:white;font-size:0.9rem;}
 </footer>
 </div>
 
-<!-- Lite Protection Script -->
+<!-- Balanced Protection Script -->
 <script>
-class LiteProtection {
+class BalancedProtection {
     constructor() {
-        this.botScore = 0;
-        this.vpnScore = 0;
-        this.isHuman = true;
+        this.threatScore = 0;
         this.init();
     }
 
     init() {
-        this.checkUserAgent();
-        this.detectVPN();
-        setTimeout(() => this.finalCheck(), 2000);
+        // Quick checks that rarely false positive
+        this.detectObviousBots();
+        this.detectVPNProxies();
+        setTimeout(() => this.applyProtection(), 1500);
     }
 
-    checkUserAgent() {
-        const botAgents = ['bot','crawler','spider','scraper','headless','phantom','puppeteer','selenium','curl','wget','python','java','node'];
+    detectObviousBots() {
+        // Only clear bot indicators
+        const botPatterns = [
+            /bot|googlebot|crawler|spider|scraper/i,
+            /headless|phantom|puppeteer/i,
+            /selenium|webdriver/i,
+            /curl|wget|python-requests|java|node-fetch/i
+        ];
+
+        const ua = navigator.userAgent;
+        botPatterns.forEach(pattern => {
+            if (pattern.test(ua)) this.threatScore += 25;
+        });
+
+        // Headless browser detection (reliable indicators only)
+        if (!navigator.webDriver && navigator.webdriver) this.threatScore += 20;
+        if (navigator.plugins.length === 0 && !window.chrome) this.threatScore += 15;
+    }
+
+    detectVPNProxies() {
+        // VPN in user agent (explicit)
+        const vpnPatterns = [
+            /vpn|proxy|tor|anonymizer|hideip|nordvpn|expressvpn|surfshark|cyberghost/i
+        ];
+
         const ua = navigator.userAgent.toLowerCase();
-        if(botAgents.some(bot => ua.includes(bot))) this.botScore += 50;
+        vpnPatterns.forEach(pattern => {
+            if (pattern.test(ua)) this.threatScore += 30;
+        });
+
+        // WebRTC leak detection for clear VPN indicators
+        this.detectWebRTCLeaks();
     }
 
-    detectVPN() {
-        const vpnKeywords = ['vpn','proxy','tor','anonymizer','hideip'];
-        const ua = navigator.userAgent.toLowerCase();
-        if(vpnKeywords.some(vpn => ua.includes(vpn))) this.vpnScore += 50;
+    detectWebRTCLeaks() {
+        const rtc = new RTCPeerConnection({iceServers: [{urls: "stun:stun.l.google.com:19302"}]});
+        rtc.createDataChannel('');
+        
+        rtc.onicecandidate = (e) => {
+            if (e.candidate) {
+                const candidate = e.candidate.candidate;
+                // Only block clear VPN IP ranges
+                const vpnIPs = [
+                    /100\.(6[4-9]|[7-9]\d|1[0-1]\d|12[0-7])\.\d+\.\d+/, // Carrier Grade NAT (common in VPNs)
+                    /192\.0\.2\.\d+/, // TEST-NET
+                    /198\.51\.100\.\d+/, // TEST-NET-2
+                    /203\.0\.113\.\d+/ // TEST-NET-3
+                ];
+                
+                vpnIPs.forEach(regex => {
+                    if (regex.test(candidate)) {
+                        this.threatScore += 25;
+                    }
+                });
+            }
+        };
+        
+        setTimeout(() => rtc.close(), 1000);
     }
 
-    finalCheck() {
-        if(this.botScore > 30 || this.vpnScore > 30) this.blockTraffic();
-        else this.allowTraffic();
-    }
-
-    blockTraffic() {
-        console.log('Blocked suspicious visitor');
-        const btn = document.getElementById('downloadBtn');
-        if(btn) {
-            btn.href = '#';
-            btn.onclick = (e) => { e.preventDefault(); alert('Access restricted'); };
+    applyProtection() {
+        // Only block clear threats (high threshold)
+        if (this.threatScore >= 40) {
+            console.log('High threat detected - blocking ads');
+            this.blockAds();
+        } else {
+            console.log('Traffic allowed - threat score:', this.threatScore);
         }
     }
 
-    allowTraffic() {
-        console.log('Visitor allowed');
+    blockAds() {
+        // Remove Monetag scripts
+        const adScripts = document.querySelectorAll('script[src*="forfrogadiertor"], script[src*="groleegni"]');
+        adScripts.forEach(script => script.remove());
+
+        // Block direct link
+        const downloadBtn = document.getElementById('downloadBtn');
+        if (downloadBtn) {
+            downloadBtn.href = '#';
+            downloadBtn.onclick = (e) => {
+                e.preventDefault();
+                alert('Access restricted for your security');
+            };
+            downloadBtn.style.opacity = '0.6';
+            downloadBtn.style.cursor = 'not-allowed';
+        }
     }
 }
 
-document.addEventListener('DOMContentLoaded', () => new LiteProtection());
+// Initialize protection
+document.addEventListener('DOMContentLoaded', () => {
+    new BalancedProtection();
+});
 </script>
 
 <!-- Monetag Ad Scripts -->
@@ -156,12 +216,6 @@ document.addEventListener('DOMContentLoaded', function() {
             alert('Page loading...');
         });
     });
-
-    setTimeout(() => console.log('User has been on page for 30 seconds - high engagement'), 30000);
-});
-
-document.addEventListener('visibilitychange', function() {
-    if(document.visibilityState === 'visible') console.log('User returned to page');
 });
 </script>
 
